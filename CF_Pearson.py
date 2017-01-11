@@ -146,16 +146,31 @@ train = docs.values[:]
 docs = pd.read_csv("netflix/TestingRatings.csv", header=None)
 test = docs.values[:]
 
-user_movie = np.zeros((2649430,17771))
-coef = np.zeros((2649430, 2649430))
+user_movie = {}
+tmp = []
+movies = []
+#coef = np.zeros((2649430, 2649430))
 
 for i in train:
-    user_movie[int(i[1])][int(i[0])] = int(i[2])
+    tmp.append(int(i[1]))
+movies = set(tmp)
+tmp = []
+people = []
+for i in train:
+    tmp.append(int(i[0]))
+people = set(tmp)
+for i in people:
+    user_movie[int(i)] = {}
+    for j in movies:
+        user_movie[int(i)][int(j)] = 0
 
+for i in train:
+    user_movie[int(i[0])][int(i[1])] = int(i[2])
+a = 1
 #print(user_movie[1205593][8]) #deneme
-
+"""
 for i in range(1, len(user_movie)):
     for j in range(i+1, len(user_movie)-1):
         coef[i][j] = pearsonr(user_movie[i], user_movie[j])
         coef[j][i] = coef[i][j]
-print(coef[8][12])
+print(coef[8][12])"""
