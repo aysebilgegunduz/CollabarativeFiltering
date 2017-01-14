@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import scipy.special as special
+
+
 #from scipy.stats.stats import pearsonr
 def _chk_asarray(a, axis):
     if axis is None:
@@ -119,9 +121,11 @@ def pearsonr(x, y):
 
     """
     # x and y should have same length.
-    x = np.asarray(x)
-    y = np.asarray(y)
     n = len(x)
+    s = pd.Series(x)
+    x = np.asarray(s.values)
+    s = pd.Series(y)
+    y = np.asarray(s.values)
     mx = x.mean()
     my = y.mean()
     xm, ym = x - mx, y - my
@@ -149,6 +153,8 @@ test = docs.values[:]
 user_movie = {}
 tmp = []
 movies = []
+coef = {}
+rate = {}
 #coef = np.zeros((2649430, 2649430))
 
 for i in train:
@@ -161,16 +167,44 @@ for i in train:
 people = set(tmp)
 for i in people:
     user_movie[int(i)] = {}
+    rate[int(i)] = {}
     for j in movies:
         user_movie[int(i)][int(j)] = 0
+        rate[int(i)][int(j)] = 0
 
 for i in train:
     user_movie[int(i[0])][int(i[1])] = int(i[2])
-a = 1
 #print(user_movie[1205593][8]) #deneme
-"""
-for i in range(1, len(user_movie)):
-    for j in range(i+1, len(user_movie)-1):
+coef_txt = open("coef_vals.txt", "w")
+for i in people:
+    coef[i] = {}
+    for j in people:
         coef[i][j] = pearsonr(user_movie[i], user_movie[j])
-        coef[j][i] = coef[i][j]
-print(coef[8][12])"""
+        coef_txt.write("{0},{1},{2}".format(int(i), int(j), coef[i][j]))
+tmp_u = 0 #up
+tmp_d = 0 #down
+coef_txt.close()
+"""for i in people:
+    for j in movies:
+        if user_movie[i][j] == 0 :
+            for k in people:
+                if coef[i][k] != 0 and coef[i][k] > 0 and user_movie[k][j] != 0:
+                    tmp_u += (coef[i][k] * user_movie[k][j]) #paydanin ust kismi
+                    tmp_d += coef[i][k] #paydanin alt kismi
+            rate[i][j] = tmp_u / tmp_d
+            tmp_d = 0
+            tmp_u = 0
+        #zaten var olanları eklemek istersek
+        else
+            rate[i][j] = user_movie[i][j]"""
+txt_file = open("PredictRatings.txt", "w")
+for i in test:
+    for k in people:
+        if coef[int(i[0])][k] != 0 and coef[int(i[0])][k] > 0 and user_movie[k][int(i[1])] != 0:
+            tmp_u += (coef[i][k] * user_movie[k][int(i[1])])  # paydanin ust kismi
+            tmp_d += coef[i][k]  # paydanin alt kismi
+        rate[int(i[0])][int(i[1])] = tmp_u / tmp_d
+        txt_file.write("{0},{1},{2}".format(int(i[0]), int(i[1]), rate[int(i[0])][int(i[1])]))
+        tmp_d = 0
+        tmp_u = 0
+txt_file.close()
