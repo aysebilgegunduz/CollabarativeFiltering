@@ -3,7 +3,6 @@ import numpy as np
 import scipy.special as special
 
 
-#from scipy.stats.stats import pearsonr
 def _chk_asarray(a, axis):
     if axis is None:
         a = np.ravel(a)
@@ -20,13 +19,6 @@ def _chk_asarray(a, axis):
 def betai(a, b, x):
     """
     Returns the incomplete beta function.
-
-    I_x(a,b) = 1/B(a,b)*(Integral(0,x) of t^(a-1)(1-t)^(b-1) dt)
-
-    where a,b>0 and B(a,b) = G(a)*G(b)/(G(a+b)) where G(a) is the gamma
-    function of a.
-
-    The standard broadcasting rules apply to a, b, and x.
 
     Parameters
     ----------
@@ -55,31 +47,12 @@ def ss(a, axis=0):
     ----------
     a : array_like
         Input array.
-    axis : int or None, optional
-        Axis along which to calculate. Default is 0. If None, compute over
-        the whole array `a`.
+    axis : int or None, optional.
 
     Returns
     -------
     ss : ndarray
         The sum along the given axis for (a**2).
-
-    See also
-    --------
-    square_of_sums : The square(s) of the sum(s) (the opposite of `ss`).
-
-    Examples
-    --------
-    >>> from scipy import stats
-    >>> a = np.array([1., 2., 5.])
-    >>> stats.ss(a)
-    30.0
-
-    And calculating along an axis:
-
-    >>> b = np.array([[1., 2., 5.], [2., 5., 6.]])
-    >>> stats.ss(b, axis=1)
-    array([ 30., 65.])
 
     """
     a, axis = _chk_asarray(a, axis)
@@ -90,19 +63,6 @@ def pearsonr(x, y):
     Calculates a Pearson correlation coefficient and the p-value for testing
     non-correlation.
 
-    The Pearson correlation coefficient measures the linear relationship
-    between two datasets. Strictly speaking, Pearson's correlation requires
-    that each dataset be normally distributed. Like other correlation
-    coefficients, this one varies between -1 and +1 with 0 implying no
-    correlation. Correlations of -1 or +1 imply an exact linear
-    relationship. Positive correlations imply that as x increases, so does
-    y. Negative correlations imply that as x increases, y decreases.
-
-    The p-value roughly indicates the probability of an uncorrelated system
-    producing datasets that have a Pearson correlation at least as extreme
-    as the one computed from these datasets. The p-values are not entirely
-    reliable but are probably reasonable for datasets larger than 500 or so.
-
     Parameters
     ----------
     x : (N,) array_like
@@ -112,8 +72,7 @@ def pearsonr(x, y):
 
     Returns
     -------
-    (Pearson's correlation coefficient,
-     2-tailed p-value)
+    (Pearson's correlation coefficient)
 
     References
     ----------
@@ -144,7 +103,6 @@ def pearsonr(x, y):
         prob = betai(0.5*df, 0.5, df/(df+t_squared))
 
     return r
-
 docs = pd.read_csv("netflix/TrainingRatings.csv", header=None)
 train = docs.values[:]
 docs = pd.read_csv("netflix/TestingRatings.csv", header=None)
@@ -204,7 +162,21 @@ for i in test:
             tmp_u += (coef[i][k] * user_movie[k][int(i[1])])  # paydanin ust kismi
             tmp_d += coef[i][k]  # paydanin alt kismi
         rate[int(i[0])][int(i[1])] = tmp_u / tmp_d
-        txt_file.write("{0},{1},{2}".format(int(i[0]), int(i[1]), rate[int(i[0])][int(i[1])]))
+        txt_file.write("{0},{1},{2}\n".format(int(i[0]), int(i[1]), rate[int(i[0])][int(i[1])]))
         tmp_d = 0
         tmp_u = 0
+txt_file.close()
+docs = pd.read_csv("PredictRatings.csv", header=None)
+observed = docs.values[:]
+
+tmp = 0
+for i,j in observed, test:
+    tmp = np.abs(j[2]-i[2])
+print(tmp = tmp / len(test))
+
+
+txt_file = open("RecommendMovie.txt", "w")
+for i in observed:
+    if i[2] >= 4:
+        txt_file.write("{0},{1},{2}\n".format(int(i[0]), int(i[1]), i[2]))
 txt_file.close()
