@@ -132,51 +132,36 @@ for i in people:
 
 for i in train:
     user_movie[int(i[0])][int(i[1])] = int(i[2])
-#print(user_movie[1205593][8]) #deneme
-coef_txt = open("coef_vals.txt", "w")
 for i in people:
     coef[i] = {}
     for j in people:
         coef[i][j] = pearsonr(user_movie[i], user_movie[j])
-        coef_txt.write("{0},{1},{2}".format(int(i), int(j), coef[i][j]))
 tmp_u = 0 #up
 tmp_d = 0 #down
-coef_txt.close()
-"""for i in people:
-    for j in movies:
-        if user_movie[i][j] == 0 :
-            for k in people:
-                if coef[i][k] != 0 and coef[i][k] > 0 and user_movie[k][j] != 0:
-                    tmp_u += (coef[i][k] * user_movie[k][j]) #paydanin ust kismi
-                    tmp_d += coef[i][k] #paydanin alt kismi
-            rate[i][j] = tmp_u / tmp_d
-            tmp_d = 0
-            tmp_u = 0
-        #zaten var olanları eklemek istersek
-        else
-            rate[i][j] = user_movie[i][j]"""
-txt_file = open("PredictRatings.txt", "w")
+
+txt_file = open("PredictRatings.csv", "w")
 for i in test:
     for k in people:
         if coef[int(i[0])][k] != 0 and coef[int(i[0])][k] > 0 and user_movie[k][int(i[1])] != 0:
             tmp_u += (coef[i][k] * user_movie[k][int(i[1])])  # paydanin ust kismi
             tmp_d += coef[i][k]  # paydanin alt kismi
         rate[int(i[0])][int(i[1])] = tmp_u / tmp_d
-        txt_file.write("{0},{1},{2}\n".format(int(i[0]), int(i[1]), rate[int(i[0])][int(i[1])]))
+        #txt_file.write("{0},{1},{2}\n".format(int(i[0]), int(i[1]), rate[int(i[0])][int(i[1])]))
         tmp_d = 0
         tmp_u = 0
 txt_file.close()
-docs = pd.read_csv("PredictRatings.csv", header=None)
-observed = docs.values[:]
+
+#docs = pd.read_csv("PredictRatings.csv", header=None)
+#observed = docs.values[:]
 
 tmp = 0
-for i,j in observed, test:
+for i,j in rate, test:
     tmp = np.abs(j[2]-i[2])
 print(tmp = tmp / len(test))
 
 
 txt_file = open("RecommendMovie.txt", "w")
-for i in observed:
+for i in rate:
     if i[2] >= 4:
         txt_file.write("{0},{1},{2}\n".format(int(i[0]), int(i[1]), i[2]))
 txt_file.close()
